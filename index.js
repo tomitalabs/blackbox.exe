@@ -88,7 +88,7 @@ function printHelp() {
   process.stdout.write([
     '',
     '  syntax:  •N [ops...]',
-    '  •N  — target channel N (1–8)',
+    '  •N  — target channel N',
     '  ~F  — signal frequency F (Hz)',
     '  >F  — temporal speed F',
     '  !F  — glitch probability F (0–1)',

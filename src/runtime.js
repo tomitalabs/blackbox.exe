@@ -7,7 +7,6 @@ const render = require('./render');
 const TICK_MS = 100;   // channel state tick (10Hz)
 const PRINT_MS = 200;  // display refresh (5Hz)
 
-let lastPrintTime = 0;
 let aiLog = [];        // recent AI injections to surface in display
 let running = false;
 

@@ -1,8 +1,6 @@
 // channels.js — multi-channel state management
 // each channel holds: freq, speed, glitch, uncertainty, ai buffer
 
-const MAX_CHANNELS = 8;
-
 const state = {};
 
 function getChannel(n) {
@@ -23,10 +21,15 @@ function applyOp(op) {
   }
 }
 
-function injectAI(ch, delta) {
+function injectAI(ch, delta, onInject) {
   const c = getChannel(ch);
   c.aiBuf = delta;
   c.freq = Math.max(0, c.freq + delta);
+  if (typeof onInject === 'function') onInject(ch, delta);
+}
+
+function resetAll() {
+  for (const key of Object.keys(state)) delete state[key];
 }
 
 function activeChannels() {
@@ -49,4 +52,4 @@ function tick(dt) {
   }
 }
 
-module.exports = { getChannel, applyOp, injectAI, activeChannels, tick };
+module.exports = { getChannel, applyOp, injectAI, resetAll, activeChannels, tick };

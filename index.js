@@ -54,7 +54,8 @@ function startREPL() {
       process.exit(0);
     }
     if (line === ':reset') {
-      process.stdout.write('[reset]\n');
+      channels.resetAll();
+      process.stdout.write('[reset] all channels cleared\n');
       rl.prompt();
       return;
     }
@@ -94,7 +95,7 @@ function printHelp() {
     '  ?F  — AI uncertainty F (0–1)',
     '',
     '  example: •1 ~220 >2 !0.3 ?0.5',
-    '           •2 ~440 ~0.1',
+    '           •2 ~440 ?0.2',
     '',
     '  :reset  — clear all channels',
     '  :help   — this screen',
@@ -103,18 +104,10 @@ function printHelp() {
   ].join('\n') + '\n');
 }
 
-// ── patch AI injectAI to also log for display ─────────────────────────────────
-
-const _injectAI = channels.injectAI.bind(channels);
-channels.injectAI = (ch, delta) => {
-  _injectAI(ch, delta);
-  runtime.logAI(ch, delta);
-};
-
 // ── main ──────────────────────────────────────────────────────────────────────
 
 boot(() => {
   runtime.start();
-  ai.startAI();
+  ai.startAI(runtime.logAI);
   startREPL();
 });

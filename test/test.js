@@ -94,6 +94,13 @@ test('injectAI modifies freq and sets aiBuf', () => {
   assert.strictEqual(ch.aiBuf, 20);
 });
 
+test('injectAI calls onInject callback', () => {
+  channels.applyOp({ ch: 16, sym: '~', val: 100 });
+  let called = null;
+  channels.injectAI(16, 10, (ch, delta) => { called = { ch, delta }; });
+  assert.deepStrictEqual(called, { ch: 16, delta: 10 });
+});
+
 test('injectAI clamps freq to >= 0', () => {
   channels.applyOp({ ch: 15, sym: '~', val: 10 });
   channels.injectAI(15, -100);
@@ -110,6 +117,13 @@ test('activeChannels returns sorted list of active channels', () => {
   for (let i = 1; i < active.length; i++) {
     assert.ok(active[i] > active[i - 1]);
   }
+});
+
+test('resetAll clears all channels', () => {
+  channels.applyOp({ ch: 30, sym: '~', val: 440 });
+  assert.ok(channels.activeChannels().includes(30));
+  channels.resetAll();
+  assert.strictEqual(channels.activeChannels().includes(30), false);
 });
 
 // ── render tests ──────────────────────────────────────────────────────────────

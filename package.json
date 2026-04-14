@@ -1,0 +1,11 @@
+{
+  "name": "blackbox.exe",
+  "version": "0.1.0",
+  "description": "_black | box.exe — performative live coding system",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test/test.js"
+  },
+  "license": "MIT"
+}

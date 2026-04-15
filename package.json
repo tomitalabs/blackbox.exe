@@ -4,8 +4,18 @@
   "description": "_black | box.exe — performative live coding system",
   "main": "index.js",
   "scripts": {
+    "dev": "node index.js",
+    "bridge": "node src/bridge.js",
     "start": "node index.js",
-    "test": "node test/test.js"
+    "test": "npm run test:unit && npm run test:blackbox",
+    "test:unit": "node test/test.js",
+    "test:blackbox": "node test/blackbox.test.js && node test/bridge.blackbox.test.js",
+    "docker:qwen05b": "docker compose --profile qwen05b up --build",
+    "docker:qwen15b": "docker compose --profile qwen15b up --build",
+    "docker:llama1b": "docker compose --profile llama1b up --build"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
   },
   "license": "MIT"
 }

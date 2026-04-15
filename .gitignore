@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+frontend/node_modules/
+
+# build outputs
+frontend/dist/
+coverage/
+
+# env files
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# OS/editor artifacts
+.DS_Store
+Thumbs.db
+*.log
+
+# legacy folder name (after rename to frontend)
+outra_parte/
+
+# paper drafts (do not commit)
+PAPER_COMPLETO.md
+template_paper.md

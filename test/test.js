@@ -5,6 +5,7 @@ const assert = require('assert');
 const parser = require('../src/parser');
 const channels = require('../src/channels');
 const render = require('../src/render');
+const llm = require('../src/llm');
 
 let passed = 0;
 let failed = 0;
@@ -166,6 +167,33 @@ test('renderChannel formats active channel', () => {
   assert.ok(result.includes('▷ 2.0'));
   assert.ok(result.includes('⚡ 0.30'));
   assert.ok(result.includes('◇ 0.50'));
+});
+
+// ── llm tests ─────────────────────────────────────────────────────────────────
+
+console.log('\nllm');
+
+test('extractFirstJsonObject returns first object', () => {
+  const text = 'noise {"delta": 3.2, "reason":"ok"} trailing';
+  const json = llm.extractFirstJsonObject(text);
+  assert.strictEqual(json, '{"delta": 3.2, "reason":"ok"}');
+});
+
+test('parseDeltaFromText reads JSON delta', () => {
+  const value = llm.parseDeltaFromText('{"delta": -4.5, "reason":"pulse"}');
+  assert.strictEqual(value, -4.5);
+});
+
+test('parseDeltaFromText falls back to first number', () => {
+  const value = llm.parseDeltaFromText('delta suggestion: 2.75 hz');
+  assert.strictEqual(value, 2.75);
+});
+
+test('createLLMClient supports disabled mode', () => {
+  const client = llm.createLLMClient({ provider: 'none' });
+  assert.strictEqual(client.enabled(), false);
+  const status = client.info();
+  assert.strictEqual(status.provider, 'none');
 });
 
 // ── summary ───────────────────────────────────────────────────────────────────

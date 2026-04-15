@@ -10,8 +10,8 @@ const PRINT_MS = 200;  // display refresh (5Hz)
 let aiLog = [];        // recent AI injections to surface in display
 let running = false;
 
-function logAI(ch, delta) {
-  aiLog.push({ ch, delta, ts: Date.now() });
+function logAI(ch, delta, source) {
+  aiLog.push({ ch, delta, source: source || 'ai', ts: Date.now() });
   // keep only last 3 entries
   if (aiLog.length > 3) aiLog.shift();
 }
@@ -47,7 +47,7 @@ function printState() {
   aiLog = aiLog.filter(e => now - e.ts < 1500);
   aiLog.forEach(e => {
     const sign = e.delta > 0 ? '+' : '';
-    process.stdout.write(`  \x1b[35m[ai] •${e.ch} freq ${sign}${e.delta.toFixed(1)}\x1b[0m\n`);
+    process.stdout.write(`  \x1b[35m[ai/${e.source}] •${e.ch} freq ${sign}${e.delta.toFixed(1)}\x1b[0m\n`);
   });
 
   // move cursor back up so next print overwrites

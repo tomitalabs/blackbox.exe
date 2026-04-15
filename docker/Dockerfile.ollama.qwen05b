@@ -1,0 +1,24 @@
+FROM ollama/ollama:latest
+
+ENV OLLAMA_MODEL=qwen2.5:0.5b
+
+RUN set -eux; \
+    ollama serve >/tmp/ollama.log 2>&1 & \
+    pid=$!; \
+    i=0; \
+    until ollama list >/dev/null 2>&1; do \
+      i=$((i+1)); \
+      if [ "$i" -ge 60 ]; then \
+        echo "ollama did not become ready in time"; \
+        cat /tmp/ollama.log; \
+        kill $pid; \
+        exit 1; \
+      fi; \
+      sleep 1; \
+    done; \
+    ollama pull ${OLLAMA_MODEL}; \
+    kill $pid
+
+EXPOSE 11434
+
+CMD ["ollama", "serve"]

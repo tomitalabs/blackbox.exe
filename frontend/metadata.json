@@ -1,0 +1,8 @@
+{
+  "name": "Black Blox Research",
+  "description": "An interactive presentation of the Black Blox research paper on live coding, XR, and critical AI.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}

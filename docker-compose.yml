@@ -1,0 +1,88 @@
+name: blackbox-multimodel
+
+services:
+  app-qwen05b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    environment:
+      AI_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://ollama-qwen05b:11434
+      OLLAMA_MODEL: qwen2.5:0.5b
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-220}
+    depends_on:
+      - ollama-qwen05b
+    stdin_open: true
+    tty: true
+    profiles:
+      - qwen05b
+
+  ollama-qwen05b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama.qwen05b
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-qwen05b:/root/.ollama
+    profiles:
+      - qwen05b
+
+  app-qwen15b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    environment:
+      AI_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://ollama-qwen15b:11434
+      OLLAMA_MODEL: qwen2.5:1.5b
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-220}
+    depends_on:
+      - ollama-qwen15b
+    stdin_open: true
+    tty: true
+    profiles:
+      - qwen15b
+
+  ollama-qwen15b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama.qwen15b
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama-qwen15b:/root/.ollama
+    profiles:
+      - qwen15b
+
+  app-llama1b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.app
+    environment:
+      AI_PROVIDER: ollama
+      OLLAMA_BASE_URL: http://ollama-llama1b:11434
+      OLLAMA_MODEL: llama3.2:1b
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-220}
+    depends_on:
+      - ollama-llama1b
+    stdin_open: true
+    tty: true
+    profiles:
+      - llama1b
+
+  ollama-llama1b:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama.llama1b
+    ports:
+      - "11436:11434"
+    volumes:
+      - ollama-llama1b:/root/.ollama
+    profiles:
+      - llama1b
+
+volumes:
+  ollama-qwen05b:
+  ollama-qwen15b:
+  ollama-llama1b:

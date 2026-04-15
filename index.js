@@ -12,14 +12,21 @@ const render   = require('./src/render');
 const runtime  = require('./src/runtime');
 const ai       = require('./src/ai');
 
+const llmStatus = ai.getLLMStatus();
+
 // ── boot sequence ─────────────────────────────────────────────────────────────
 
 function boot(cb) {
+  const llmLine = llmStatus.enabled
+    ? `[boot] local llm: ${llmStatus.provider}:${llmStatus.model} (${llmStatus.timeoutMs}ms)`
+    : `[boot] local llm: disabled (${llmStatus.reason})`;
+
   const lines = [
     '\n_black | box.exe\n',
     '[boot] initializing time...',
     '[boot] loading audio...',
     '[boot] spawning AI...',
+    llmLine,
     '\x1b[33m[warning] instability enabled\x1b[0m',
     '\x1b[32m[ready]\x1b[0m\n',
   ];
@@ -35,6 +42,9 @@ function boot(cb) {
 // ── REPL ──────────────────────────────────────────────────────────────────────
 
 function startREPL() {
+  let chatInFlight = false;
+  let lineQueue = Promise.resolve();
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -44,7 +54,7 @@ function startREPL() {
 
   rl.prompt();
 
-  rl.on('line', (raw) => {
+  async function handleLine(raw) {
     const line = raw.trim();
     if (!line) { rl.prompt(); return; }
 
@@ -64,6 +74,37 @@ function startREPL() {
       rl.prompt();
       return;
     }
+    if (line === ':llm') {
+      printLLMStatus();
+      rl.prompt();
+      return;
+    }
+    if (line === ':chat' || line.startsWith(':chat ')) {
+      const message = line.slice(5).trim();
+      if (!message) {
+        process.stdout.write('\x1b[33m[llm] use: :chat <mensagem>\x1b[0m\n');
+        rl.prompt();
+        return;
+      }
+      if (chatInFlight) {
+        process.stdout.write('\x1b[33m[llm] aguarde a resposta atual\x1b[0m\n');
+        rl.prompt();
+        return;
+      }
+
+      chatInFlight = true;
+      process.stdout.write('\x1b[36m[llm]\x1b[0m thinking...\n');
+      try {
+        const answer = await ai.chat(message);
+        process.stdout.write(`\x1b[36m[llm]\x1b[0m ${answer}\n`);
+      } catch (err) {
+        process.stdout.write(`\x1b[31m[llm error]\x1b[0m ${err.message}\n`);
+      } finally {
+        chatInFlight = false;
+        rl.prompt();
+      }
+      return;
+    }
 
     // parse + apply
     const ops = parser.parse(line);
@@ -76,12 +117,38 @@ function startREPL() {
     }
 
     rl.prompt();
+  }
+
+  rl.on('line', (raw) => {
+    lineQueue = lineQueue
+      .then(() => handleLine(raw))
+      .catch((err) => {
+        process.stdout.write(`\x1b[31m[repl error]\x1b[0m ${err.message}\n`);
+        rl.prompt();
+      });
   });
 
   rl.on('close', () => {
     process.stdout.write('\n[halt] time stops.\n');
     process.exit(0);
   });
+}
+
+function printLLMStatus() {
+  const status = ai.getLLMStatus();
+  if (!status.enabled) {
+    process.stdout.write(`[llm] disabled (${status.reason})\n`);
+    return;
+  }
+
+  process.stdout.write([
+    '[llm] status',
+    `  provider: ${status.provider}`,
+    `  model: ${status.model}`,
+    `  timeout: ${status.timeoutMs}ms`,
+    `  endpoint: ${status.baseUrl}`,
+    `  hint: use a quantized small model, e.g. ${status.recommendedQuantized}`,
+  ].join('\n') + '\n');
 }
 
 function printHelp() {
@@ -98,8 +165,16 @@ function printHelp() {
     '           •2 ~440 ?0.2',
     '',
     '  :reset  — clear all channels',
+    '  :llm    — show local LLM status',
+    '  :chat M — talk to local LLM (M = message)',
     '  :help   — this screen',
     '  :quit   — halt',
+    '',
+    '  env:',
+    '  AI_PROVIDER=ollama|none',
+    '  OLLAMA_MODEL=qwen2.5:0.5b',
+    '  OLLAMA_BASE_URL=http://127.0.0.1:11434',
+    '  AI_TIMEOUT_MS=220',
     '',
   ].join('\n') + '\n');
 }

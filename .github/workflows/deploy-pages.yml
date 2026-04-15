@@ -1,5 +1,7 @@
 name: Deploy XR Frontend to GitHub Pages
 
+# This workflow deploys the static frontend bundle from the frontend folder.
+
 on:
   push:
     branches:

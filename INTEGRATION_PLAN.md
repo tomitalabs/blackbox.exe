@@ -114,12 +114,11 @@ Etapa 4 - Qualidade unificada
 ## 7) Limpeza de dependencias
 
 No pacote frontend, revisar e remover se nao usados:
-- @google/genai
 - express
 - dotenv
 
 Observacao:
-- hoje o frontend ja funciona sem usar Gemini de fato.
+- o frontend ja funciona sem dependencia de provedor proprietario.
 
 ## 8) Criterios de pronto da versao unica
 
